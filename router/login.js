@@ -16,6 +16,5 @@ const {
 router.post('/register',expressjoi(login_limit),loginhandle.register)
 //登入
 router.post('/login',expressjoi(login_limit),loginhandle.login)
-
 //对外暴露路由
 module.exports =router

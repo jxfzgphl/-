@@ -5,9 +5,19 @@ const loginrouter=require('./router/login')
 const jwtconfig=require('./jwt-config/index.js')
 const {expressjwt:jwt}=require('express-jwt')
 const Joi=require('joi')
+const userRouter=require('./router/userinfo')
+//multer是node.js的一个中间件，用于处理multiport/form-data类型的表单数据，它主要用于上传文件
+const multer = require('multer')
+//在sever服务端下新建一个public文件，在public文件下新建一个upload文件用于存放图片
+const upload=multer({dest:'./public/upload'})
+
+
 const app=express()
 
 app.use(cors())
+app.use(upload.any())
+// 静态托管
+app.use(express.static("./public"))
 //	当extended为false时，值为数组和字符串；为true时，值为任意类型
 app.use(bodyparser.urlencoded({extended:false}))
 app.use(bodyparser.json())
@@ -24,14 +34,16 @@ app.use((req,res,next)=>{
 	next()
 })
 
-app.use(jwt({
-	secret:jwtconfig.jwtSecretKey,
-	algorithms:['HS256']
-}).unless({
-	path:[/^\/api\//]
-}))
+// app.use(jwt({
+// 	secret:jwtconfig.jwtSecretKey,
+// 	algorithms:['HS256']
+// }).unless({
+// 	path:[/^\/api\//]
+// }))
 
 app.use('/api',loginrouter)
+
+app.use('/user',userRouter)
 //对不符合joi规则的情况进行报错
 app.use((err,req,res,next)=>{
 	if(err instanceof Joi.ValidationError) return res.cc(err,0) 
@@ -39,5 +51,5 @@ app.use((err,req,res,next)=>{
 
 
 app.listen(3007, () => {
-	console.log('http://127.0.0.1:3007:')
+	console.log('http://127.0.0.1:3007')
 })

@@ -15,6 +15,8 @@ const email=joi.string().pattern(/^(([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a
 //密码验证
 const oldpwd=joi.string().pattern(/^(?![0-9]+$)[a-z0-9]{1,50}$/).min(6).max(18).required()
 const newpwd=joi.string().pattern(/^(?![0-9]+$)[a-z0-9]{1,50}$/).min(6).max(18).required()
+//忘记密码
+const account=joi.string().alphanum().min(6).max(12).required()
 exports.name_limit={
 	//表示对req.body里面的收据进行验证
 	body:{
@@ -35,5 +37,19 @@ exports.pwd_limit={
 		id,
 		oldpwd,
 		newpwd
+	}
+}
+exports.verify_limit={
+	//表示对req.body里面的收据进行验证
+	body:{
+		account,
+		email
+	}
+}
+exports.change_limit={
+	//表示对req.body里面的收据进行验证
+	body:{
+		id,
+		newpwd,
 	}
 }

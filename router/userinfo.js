@@ -10,7 +10,7 @@ const userinfohandle=require('../router-handle/userinfo')
 
 //导入验证规则
 const {
-	name_limit,email_limit,pwd_limit
+	name_limit,email_limit,pwd_limit,verify_limit,change_limit
 }=require('../limit/user.js')
 
 
@@ -28,5 +28,10 @@ router.post('/changeSex',userinfohandle.changeSex)
 router.post('/changeEmail',expressjoi(email_limit),userinfohandle.changeEmail)
 //修改密码
 router.post('/changePassword',expressjoi(pwd_limit),userinfohandle.changePassword)
+/*    忘记密码    */
+//1.验证账号和邮箱是否一致
+router.post('/verify',expressjoi(verify_limit),userinfohandle.verify)
+//2修改密码
+router.post('/changepwd',expressjoi(change_limit),userinfohandle.changepwd)
 //对外暴露路由
 module.exports =router

@@ -28,7 +28,6 @@ exports.uploadAvatar=(req,res)=>{
 		})
 	})
 }
-
 //绑定账号
 exports.bindaccount=(req,res)=>{
 	const {onlyId,account,url}=req.body
@@ -47,8 +46,6 @@ exports.bindaccount=(req,res)=>{
 		}
 	})
 }
-
-
 //获取用户信息
 exports.getUserinfo=(req,res)=>{
 	const sql='select * from users where id=?'
@@ -99,17 +96,25 @@ exports.changePassword=(req,res)=>{
 	const sql='select password from users where id = ?'
 	db.query(sql,pwdfo.id,(err,result)=>{
 		if(err) return res.cc(err)
-		const compareResult =bcrypt.compareSync(pwdfo.oldpwd,result[0].password)
-		if(compareResult){
-			pwdfo.newpwd=bcrypt.hashSync(pwdfo.newpwd,10)
-			const sql1='update users set password=? where id = ?'
-			db.query(sql1,[pwdfo.newpwd,pwdfo.id],(err,results)=>{
-				if(err) return res.cc(err)
-				res.send({
-					status:0,
-					message:'修改成功'
+		const compareResult1 =bcrypt.compareSync(pwdfo.oldpwd,result[0].password)
+		const compareResult2 =bcrypt.compareSync(pwdfo.newpwd,result[0].password)
+		if(compareResult1){
+			if(compareResult2){
+				pwdfo.newpwd=bcrypt.hashSync(pwdfo.newpwd,10)
+				const sql1='update users set password=? where id = ?'
+				db.query(sql1,[pwdfo.newpwd,pwdfo.id],(err,results)=>{
+					if(err) return res.cc(err)
+					res.send({
+						status:0,
+						message:'修改成功'
+					})
 				})
-			})
+			}else{
+				return res.send({
+					status:1,
+					message:'新密码不能和旧密码相同'
+				})
+			}
 		}else{
 			res.send({
 				status:1,
@@ -117,4 +122,50 @@ exports.changePassword=(req,res)=>{
 			})
 		}
 	})
+}
+
+/*    忘记密码    */
+//1.验证账号和邮箱是否一致
+exports.verify=(req,res)=>{
+	const {account,email}=req.body
+	const sql='select email from users where account = ?'
+	db.query(sql,account,(err,result)=>{
+		if(err) return res.cc(err)
+		if(email&&email===result[0].email){
+			return res.send({
+				status:0,
+				message:'验证成功'
+			})
+		}else{
+			res.send({
+				status:1,
+				message:'账号与邮箱不一致'
+			})
+		}
+	})
+}
+//2.修改密码
+exports.changepwd=(req,res)=>{
+	const sql='select password from users where id = ?'
+	db.query(sql,req.body.id,(err,result)=>{
+		const compareResult=bcrypt.compareSync(req.body.newpwd,result[0].password)
+		if(compareResult){
+			return res.send({
+				status:1,
+				message:'新密码不能和旧密码相同'
+			})
+		}else{
+			req.body.newpwd=bcrypt.hashSync(req.body.newpwd,10)
+			const sql1='update users set password=? where id = ?'
+			db.query(sql1,[req.body.newpwd,req.body.id],(err,results)=>{
+				if(err) return res.cc(err)
+				res.send({
+					status:0,
+					message:'修改成功'
+				})
+			})
+		}
+		
+	})
+	
 }

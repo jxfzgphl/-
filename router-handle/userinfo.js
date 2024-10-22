@@ -128,13 +128,14 @@ exports.changePassword=(req,res)=>{
 //1.验证账号和邮箱是否一致
 exports.verify=(req,res)=>{
 	const {account,email}=req.body
-	const sql='select email from users where account = ?'
+	const sql='select * from users where account = ?'
 	db.query(sql,account,(err,result)=>{
 		if(err) return res.cc(err)
 		if(email&&email===result[0].email){
 			return res.send({
 				status:0,
-				message:'验证成功'
+				message:'验证成功',
+				id:result[0].id
 			})
 		}else{
 			res.send({
@@ -146,26 +147,26 @@ exports.verify=(req,res)=>{
 }
 //2.修改密码
 exports.changepwd=(req,res)=>{
+	const data=req.body
 	const sql='select password from users where id = ?'
-	db.query(sql,req.body.id,(err,result)=>{
-		const compareResult=bcrypt.compareSync(req.body.newpwd,result[0].password)
+	db.query(sql,data.id,(err,result)=>{
+		if(err) return res.cc(err)
+		const compareResult=bcrypt.compareSync(data.newpwd,result[0].password)
 		if(compareResult){
 			return res.send({
 				status:1,
 				message:'新密码不能和旧密码相同'
 			})
 		}else{
-			req.body.newpwd=bcrypt.hashSync(req.body.newpwd,10)
+			data.newpwd=bcrypt.hashSync(data.newpwd,10)
 			const sql1='update users set password=? where id = ?'
-			db.query(sql1,[req.body.newpwd,req.body.id],(err,results)=>{
+			db.query(sql1,[data.newpwd,data.id],(err,results)=>{
 				if(err) return res.cc(err)
 				res.send({
 					status:0,
-					message:'修改成功'
+					message:'修改成功',
 				})
 			})
 		}
-		
 	})
-	
 }

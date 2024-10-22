@@ -43,8 +43,10 @@ exports.register=(req,res)=>{
 			//初始未冻结状态为0
 			status:0,
 		},(err,results)=>{
+			if(err) return res.cc(err)
 			//插入失败
 			//affectedRows为影响的行数，如果插入失败，那么就没有影响到行数，也就是行数不为1
+			
 			if(results.affectedRows!==1){
 				return res.send({
 					status:1,

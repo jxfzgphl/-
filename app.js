@@ -6,6 +6,8 @@ const jwtconfig=require('./jwt-config/index.js')
 const {expressjwt:jwt}=require('express-jwt')
 const Joi=require('joi')
 const userRouter=require('./router/userinfo')
+const fileRouter=require('./router/files')
+const tokenRouter=require('./router/setUpload')
 //multer是node.js的一个中间件，用于处理multiport/form-data类型的表单数据，它主要用于上传文件
 const multer = require('multer')
 //在sever服务端下新建一个public文件，在public文件下新建一个upload文件用于存放图片
@@ -23,7 +25,7 @@ app.use(bodyparser.urlencoded({extended:false}))
 app.use(bodyparser.json())
 
 app.use((req,res,next)=>{
-	//status=0为失败，=1为成功，默认为1
+	//status=1为失败，=0为成功，默认为1
 	res.cc = (err,status = 1)=>{
 		res.send({
 			status:status,
@@ -44,9 +46,11 @@ app.use((req,res,next)=>{
 app.use('/api',loginrouter)
 
 app.use('/user',userRouter)
+app.use('/file',fileRouter)
+app.use('/files',tokenRouter)
 //对不符合joi规则的情况进行报错
 app.use((err,req,res,next)=>{
-	if(err instanceof Joi.ValidationError) return res.cc(err,0) 
+	if(err instanceof Joi.ValidationError) return res.cc(err) 
 })
 
 
